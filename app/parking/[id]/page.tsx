@@ -88,7 +88,7 @@ export default function ParkingDetailsPage({ params }: { params: Promise<{ id: s
           <h1 className="text-3xl font-bold">{parkingLot.name}</h1>
           <p className="text-muted-foreground flex items-center gap-1 mt-1">
             <MapPin className="w-4 h-4" />
-            {parkingLot.location}
+            {parkingLot.address}
           </p>
         </div>
 

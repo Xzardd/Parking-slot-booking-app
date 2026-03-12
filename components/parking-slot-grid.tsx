@@ -57,7 +57,7 @@ export function ParkingSlotGrid({ slots, selectedSlot, onSlotSelect }: ParkingSl
                   })
                   .map((slot) => {
                     const isSelected = selectedSlot?._id === slot._id;
-                    const isBooked = slot.status === "booked";
+                    const isBooked = !slot.isAvailable;
 
                     return (
                       <button

@@ -6,13 +6,13 @@ import useSWR, { mutate } from "swr";
 import { fetchUserBookings, cancelBooking, Booking } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Empty } from "@/components/ui/empty";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format, isPast } from "date-fns";
-import { Calendar, Clock, MapPin, Car, X } from "lucide-react";
+import { format, isPast, parseISO } from "date-fns";
+import { Calendar, Clock, Car, X, MapPin, DollarSign } from "lucide-react";
 import Link from "next/link";
 import {
   AlertDialog,
@@ -33,11 +33,9 @@ function BookingCard({
   booking: Booking;
   onCancel?: (id: string) => void;
 }) {
-  const startTime = new Date(booking.startTime);
-  const endTime = new Date(booking.endTime);
-  const isActive = booking.status === "active" && !isPast(endTime);
+  const bookingDate = typeof booking.date === 'string' ? parseISO(booking.date) : new Date(booking.date);
+  const isActive = booking.status === "active";
   const isCancelled = booking.status === "cancelled";
-  const isCompleted = booking.status === "completed" || (booking.status === "active" && isPast(endTime));
 
   return (
     <Card className={isCancelled ? "opacity-60" : ""}>
@@ -49,21 +47,38 @@ function BookingCard({
                 <Car className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <p className="font-bold text-lg">{booking.slotNumber}</p>
-                <p className="text-sm text-muted-foreground">{booking.parkingLotName}</p>
+                <p className="font-bold text-lg">{booking.slot?.slotNumber || "N/A"}</p>
+                <p className="text-sm text-muted-foreground">{booking.parkingLot?.name || "Unknown Location"}</p>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Calendar className="w-4 h-4" />
-                {format(startTime, "MMM d, yyyy")}
+                {format(bookingDate, "MMM d, yyyy")}
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Clock className="w-4 h-4" />
-                {format(startTime, "h:mm a")} - {format(endTime, "h:mm a")}
+                {booking.startTime} - {booking.endTime}
               </div>
+              {booking.parkingLot?.address && (
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <MapPin className="w-4 h-4" />
+                  {booking.parkingLot.address}
+                </div>
+              )}
+              {booking.totalAmount && (
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <DollarSign className="w-4 h-4" />
+                  ${booking.totalAmount}
+                </div>
+              )}
             </div>
+            {booking.vehicleNumber && (
+              <p className="text-sm text-muted-foreground">
+                Vehicle: {booking.vehicleNumber}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col items-end gap-2">
@@ -86,7 +101,7 @@ function BookingCard({
                   <AlertDialogHeader>
                     <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to cancel this booking for slot {booking.slotNumber}?
+                      Are you sure you want to cancel this booking for slot {booking.slot?.slotNumber}?
                       This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -147,14 +162,8 @@ export default function DashboardPage() {
     return null;
   }
 
-  const activeBookings =
-    bookings?.filter(
-      (b) => b.status === "active" && !isPast(new Date(b.endTime))
-    ) || [];
-  const pastBookings =
-    bookings?.filter(
-      (b) => b.status !== "active" || isPast(new Date(b.endTime))
-    ) || [];
+  const activeBookings = bookings?.filter((b) => b.status === "active") || [];
+  const pastBookings = bookings?.filter((b) => b.status !== "active") || [];
 
   return (
     <main className="min-h-screen bg-secondary">
@@ -167,7 +176,7 @@ export default function DashboardPage() {
         {error ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-destructive">Failed to load bookings. Please make sure the backend server is running.</p>
+              <p className="text-destructive">Failed to load bookings. Please try again.</p>
             </CardContent>
           </Card>
         ) : (

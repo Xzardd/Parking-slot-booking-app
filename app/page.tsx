@@ -17,7 +17,7 @@ function ParkingLotCard({ lot }: { lot: ParkingLot }) {
             <CardTitle className="text-lg">{lot.name}</CardTitle>
             <CardDescription className="flex items-center gap-1 mt-1">
               <MapPin className="w-4 h-4" />
-              {lot.location}
+              {lot.address}
             </CardDescription>
           </div>
           <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center">
@@ -29,12 +29,12 @@ function ParkingLotCard({ lot }: { lot: ParkingLot }) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex gap-6">
             <div>
-              <p className="text-2xl font-bold">{lot.totalSlots}</p>
-              <p className="text-sm text-muted-foreground">Total Slots</p>
+              <p className="text-2xl font-bold">{lot.availableSlots}</p>
+              <p className="text-sm text-muted-foreground">Available</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-primary">{lot.availableSlots}</p>
-              <p className="text-sm text-muted-foreground">Available</p>
+              <p className="text-2xl font-bold text-primary">${lot.pricePerHour}</p>
+              <p className="text-sm text-muted-foreground">Per Hour</p>
             </div>
           </div>
         </div>
