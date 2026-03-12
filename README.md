@@ -1,4 +1,5 @@
-# v0-parking-slot-booking-app
+# Parking Slot Booking App
+Parking Slot Booking App
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
 
