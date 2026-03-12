@@ -11,8 +11,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { Empty } from "@/components/ui/empty";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format, isPast, parseISO } from "date-fns";
-import { Calendar, Clock, Car, X, MapPin, DollarSign } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { Calendar, Clock, Car, X, MapPin, DollarSign, ArrowLeft, ParkingCircle } from "lucide-react";
 import Link from "next/link";
 import {
   AlertDialog,
@@ -38,38 +38,38 @@ function BookingCard({
   const isCancelled = booking.status === "cancelled";
 
   return (
-    <Card className={isCancelled ? "opacity-60" : ""}>
+    <Card className={`group transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${isCancelled ? "opacity-60" : ""}`}>
       <CardContent className="pt-6">
         <div className="flex items-start justify-between">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <Car className="w-6 h-6 text-primary" />
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
+                <Car className="w-6 h-6 text-primary group-hover:text-primary-foreground transition-colors" />
               </div>
               <div>
-                <p className="font-bold text-lg">{booking.slot?.slotNumber || "N/A"}</p>
+                <p className="font-bold text-lg group-hover:text-primary transition-colors">{booking.slot?.slotNumber || "N/A"}</p>
                 <p className="text-sm text-muted-foreground">{booking.parkingLot?.name || "Unknown Location"}</p>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-1 text-muted-foreground">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-4 h-4 text-primary" />
                 {format(bookingDate, "MMM d, yyyy")}
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">
-                <Clock className="w-4 h-4" />
+                <Clock className="w-4 h-4 text-primary" />
                 {booking.startTime} - {booking.endTime}
               </div>
               {booking.parkingLot?.address && (
                 <div className="flex items-center gap-1 text-muted-foreground">
-                  <MapPin className="w-4 h-4" />
+                  <MapPin className="w-4 h-4 text-primary" />
                   {booking.parkingLot.address}
                 </div>
               )}
               {booking.totalAmount && (
                 <div className="flex items-center gap-1 text-muted-foreground">
-                  <DollarSign className="w-4 h-4" />
+                  <DollarSign className="w-4 h-4 text-primary" />
                   ${booking.totalAmount}
                 </div>
               )}
@@ -92,7 +92,11 @@ function BookingCard({
             {isActive && onCancel && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-destructive">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground transition-all hover:scale-105"
+                  >
                     <X className="w-4 h-4 mr-1" />
                     Cancel
                   </Button>
@@ -152,7 +156,7 @@ export default function DashboardPage() {
 
   if (authLoading || isLoading) {
     return (
-      <main className="min-h-screen bg-secondary flex items-center justify-center">
+      <main className="min-h-screen bg-background flex items-center justify-center">
         <Spinner className="w-8 h-8" />
       </main>
     );
@@ -166,11 +170,59 @@ export default function DashboardPage() {
   const pastBookings = bookings?.filter((b) => b.status !== "active") || [];
 
   return (
-    <main className="min-h-screen bg-secondary">
+    <main className="min-h-screen bg-secondary/30">
       <div className="container mx-auto px-4 py-8">
+        {/* Header with Back Button */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">My Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {user.name}</p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => router.push("/")}
+            className="mb-4 gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all hover:scale-105"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold">My Dashboard</h1>
+              <p className="text-muted-foreground">Welcome back, <span className="font-medium text-foreground">{user.name}</span></p>
+            </div>
+            <Link href="/">
+              <Button className="gap-2 hover:scale-105 transition-transform">
+                <ParkingCircle className="w-4 h-4" />
+                Book New Slot
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card className="group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <CardContent className="pt-6 text-center">
+              <p className="text-3xl font-bold text-primary">{bookings?.length || 0}</p>
+              <p className="text-sm text-muted-foreground">Total Bookings</p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <CardContent className="pt-6 text-center">
+              <p className="text-3xl font-bold text-green-600">{activeBookings.length}</p>
+              <p className="text-sm text-muted-foreground">Active</p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <CardContent className="pt-6 text-center">
+              <p className="text-3xl font-bold">{bookings?.filter(b => b.status === "completed").length || 0}</p>
+              <p className="text-sm text-muted-foreground">Completed</p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <CardContent className="pt-6 text-center">
+              <p className="text-3xl font-bold text-destructive">{bookings?.filter(b => b.status === "cancelled").length || 0}</p>
+              <p className="text-sm text-muted-foreground">Cancelled</p>
+            </CardContent>
+          </Card>
         </div>
 
         {error ? (
@@ -181,11 +233,11 @@ export default function DashboardPage() {
           </Card>
         ) : (
           <Tabs defaultValue="active" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="active">
+            <TabsList className="bg-background">
+              <TabsTrigger value="active" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 Active Bookings ({activeBookings.length})
               </TabsTrigger>
-              <TabsTrigger value="history">
+              <TabsTrigger value="history" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 History ({pastBookings.length})
               </TabsTrigger>
             </TabsList>
@@ -199,7 +251,10 @@ export default function DashboardPage() {
                       description="You don't have any active parking bookings"
                     >
                       <Link href="/">
-                        <Button>Book a Slot</Button>
+                        <Button className="gap-2 hover:scale-105 transition-transform">
+                          <Car className="w-4 h-4" />
+                          Book a Slot
+                        </Button>
                       </Link>
                     </Empty>
                   </CardContent>

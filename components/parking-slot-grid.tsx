@@ -24,30 +24,33 @@ export function ParkingSlotGrid({ slots, selectedSlot, onSlotSelect }: ParkingSl
   // Sort rows alphabetically
   const sortedRows = Object.keys(groupedSlots).sort();
 
+  const availableCount = slots.filter(s => s.isAvailable).length;
+  const bookedCount = slots.filter(s => !s.isAvailable).length;
+
   return (
     <div className="space-y-6">
       {/* Legend */}
-      <div className="flex flex-wrap gap-6 justify-center p-4 bg-card rounded-lg border">
+      <div className="flex flex-wrap gap-6 justify-center p-4 bg-secondary/50 rounded-lg">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[var(--slot-available)]" />
-          <span className="text-sm">Available</span>
+          <div className="w-6 h-6 rounded bg-[var(--slot-available)] shadow-sm" />
+          <span className="text-sm">Available ({availableCount})</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[var(--slot-selected)]" />
+          <div className="w-6 h-6 rounded bg-[var(--slot-selected)] shadow-sm" />
           <span className="text-sm">Selected</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[var(--slot-booked)]" />
-          <span className="text-sm">Booked</span>
+          <div className="w-6 h-6 rounded bg-[var(--slot-booked)] shadow-sm" />
+          <span className="text-sm">Booked ({bookedCount})</span>
         </div>
       </div>
 
       {/* Slots Grid */}
-      <div className="bg-card rounded-lg border p-6">
+      <div className="bg-secondary/30 rounded-lg p-6">
         <div className="space-y-4">
           {sortedRows.map((row) => (
             <div key={row} className="flex items-center gap-4">
-              <span className="w-8 text-center font-bold text-muted-foreground">{row}</span>
+              <span className="w-8 text-center font-bold text-primary">{row}</span>
               <div className="flex flex-wrap gap-2">
                 {groupedSlots[row]
                   .sort((a, b) => {
@@ -65,15 +68,15 @@ export function ParkingSlotGrid({ slots, selectedSlot, onSlotSelect }: ParkingSl
                         onClick={() => !isBooked && onSlotSelect(slot)}
                         disabled={isBooked}
                         className={cn(
-                          "w-14 h-14 rounded-lg flex flex-col items-center justify-center transition-all",
-                          "text-sm font-medium",
-                          isBooked && "bg-[var(--slot-booked)] text-white cursor-not-allowed",
-                          !isBooked && !isSelected && "bg-[var(--slot-available)] hover:bg-[var(--slot-available)]/80 text-foreground cursor-pointer",
-                          isSelected && "bg-[var(--slot-selected)] text-white ring-2 ring-offset-2 ring-[var(--slot-selected)]"
+                          "w-14 h-14 rounded-lg flex flex-col items-center justify-center transition-all duration-200",
+                          "text-sm font-medium shadow-sm",
+                          isBooked && "bg-[var(--slot-booked)] text-white cursor-not-allowed opacity-60",
+                          !isBooked && !isSelected && "bg-[var(--slot-available)] hover:bg-primary/20 hover:scale-105 text-foreground cursor-pointer",
+                          isSelected && "bg-[var(--slot-selected)] text-white scale-110 ring-2 ring-offset-2 ring-[var(--slot-selected)] shadow-lg"
                         )}
                         title={isBooked ? "This slot is booked" : `Select slot ${slot.slotNumber}`}
                       >
-                        <Car className="w-4 h-4 mb-0.5" />
+                        <Car className={cn("w-4 h-4 mb-0.5 transition-transform", isSelected && "animate-pulse")} />
                         <span className="text-xs">{slot.slotNumber}</span>
                       </button>
                     );
@@ -83,6 +86,11 @@ export function ParkingSlotGrid({ slots, selectedSlot, onSlotSelect }: ParkingSl
           ))}
         </div>
       </div>
+
+      {/* Tip */}
+      <p className="text-center text-sm text-muted-foreground">
+        Click on an available slot to select it for booking
+      </p>
     </div>
   );
 }
